@@ -14,8 +14,8 @@ namespace Microsoft.AspNetCore.Cors.Infrastructure
     public class CorsMiddleware
     {
         // Property key is used by other systems, e.g. MVC, to check if CORS middleware has run
-        private const string CorsMiddlewareInvokedKey = "__CorsMiddlewareInvoked";
-        private static readonly object CorsMiddlewareInvokedValue = new object();
+        private const string CorsMiddlewareWithEndpointInvokedKey = "__CorsMiddlewareWithEndpointInvoked";
+        private static readonly object CorsMiddlewareWithEndpointInvokedValue = new object();
 
         private readonly Func<object, Task> OnResponseStartingDelegate = OnResponseStarting;
         private readonly RequestDelegate _next;
@@ -127,10 +127,9 @@ namespace Microsoft.AspNetCore.Cors.Infrastructure
 
             if (endpoint != null)
             {
-                // Flag to indicate to the system that the middleware was run in the context of endpoint routing.
-                // Setting this flag allows a check in EndpointRoutingMiddleware that verifies if the middleware
-                // pipeline is wired correctly to succeed.
-                context.Items[CorsMiddlewareInvokedKey] = CorsMiddlewareInvokedValue;
+                // EndpointRoutingMiddleware uses this flag to check if the CORS middleware processed CORS metadata on the endpoint.
+                // The CORS middleware can only make this claim if it observes an actual endpoint.
+                context.Items[CorsMiddlewareWithEndpointInvokedKey] = CorsMiddlewareWithEndpointInvokedValue;
             }
 
             if (!context.Request.Headers.ContainsKey(CorsConstants.Origin))

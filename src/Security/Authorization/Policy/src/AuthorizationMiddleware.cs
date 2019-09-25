@@ -13,9 +13,9 @@ namespace Microsoft.AspNetCore.Authorization
 {
     public class AuthorizationMiddleware
     {
-        // Property key is used by other systems, e.g. MVC, to check if authorization middleware has run
-        private const string AuthorizationMiddlewareInvokedKey = "__AuthorizationMiddlewareInvoked";
-        private static readonly object AuthorizationMiddlewareInvokedValue = new object();
+        // Property key is used by Endpoint routing to determine if Authorization has run
+        private const string AuthorizationMiddlewareInvokedWithEndpointKey = "__AuthorizationMiddlewareWithEndpointInvoked";
+        private static readonly object AuthorizationMiddlewareWithEndpointInvokedValue = new object();
 
         private readonly RequestDelegate _next;
         private readonly IAuthorizationPolicyProvider _policyProvider;
@@ -37,10 +37,9 @@ namespace Microsoft.AspNetCore.Authorization
 
             if (endpoint != null)
             {
-                // Flag to indicate to the system that the middleware was run in the context of endpoint routing.
-                // Setting this flag allows a check in EndpointRoutingMiddleware that verifies if the middleware
-                // pipeline is wired correctly to succeed.
-                context.Items[AuthorizationMiddlewareInvokedKey] = AuthorizationMiddlewareInvokedValue;
+                // EndpointRoutingMiddleware uses this flag to check if the Authorization middleware processed auth metadata on the endpoint.
+                // The Authorization middleware can only make this claim if it observes an actual endpoint.
+                context.Items[AuthorizationMiddlewareInvokedWithEndpointKey] = AuthorizationMiddlewareWithEndpointInvokedValue;
             }
 
             // IMPORTANT: Changes to authorization logic should be mirrored in MVC's AuthorizeFilter

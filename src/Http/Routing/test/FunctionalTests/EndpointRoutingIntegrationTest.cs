@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -52,6 +53,31 @@ namespace Microsoft.AspNetCore.Routing.FunctionalTests
         }
 
         [Fact]
+        public async Task AuthorizationMiddleware_WhenEndpointIsNotFound()
+        {
+            // Arrange
+            var builder = new WebHostBuilder();
+            builder.Configure(app =>
+            {
+                app.UseRouting();
+                app.UseAuthorization();
+                app.UseEndpoints(b => b.Map("/", TestDelegate));
+
+            })
+           .ConfigureServices(services =>
+           {
+               services.AddAuthorization();
+               services.AddRouting();
+           });
+
+            using var server = new TestServer(builder);
+
+            var response = await server.CreateRequest("/not-found").SendAsync("GET");
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
         public async Task AuthorizationMiddleware_WithAuthorizedEndpoint()
         {
             // Arrange
@@ -97,6 +123,29 @@ namespace Microsoft.AspNetCore.Routing.FunctionalTests
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => server.CreateRequest("/").SendAsync("GET"));
             Assert.Equal(AuthErrorMessage, ex.Message);
+        }
+
+        [Fact]
+        public async Task AuthorizationMiddleware_NotConfigured_WhenEndpointIsNotFound()
+        {
+            // Arrange
+            var builder = new WebHostBuilder();
+            builder.Configure(app =>
+            {
+                app.UseRouting();
+                app.UseEndpoints(b => b.Map("/", TestDelegate).RequireAuthorization());
+
+            })
+           .ConfigureServices(services =>
+           {
+               services.AddRouting();
+           });
+
+            using var server = new TestServer(builder);
+
+            var response = await server.CreateRequest("/not-found").SendAsync("GET");
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
