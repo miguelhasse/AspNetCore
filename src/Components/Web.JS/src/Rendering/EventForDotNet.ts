@@ -8,9 +8,8 @@ export class EventForDotNet<TData extends UIEventArgs> {
 
       case 'input':
       case 'change': {
-        const targetIsTimeBasedInput = isTimeBasedInput(element);
 
-        if (targetIsTimeBasedInput) {
+        if (isTimeBasedInput(element)) {
           const normalizedValue = normalizeTimeBasedValue(element);
           return new EventForDotNet<UIChangeEventArgs>('change', { type: event.type, value: normalizedValue });
         }
@@ -223,13 +222,13 @@ const timeBasedInputs = [
   'week',
 ];
 
-function isTimeBasedInput(element: Element | null): boolean {
-  return !!element && timeBasedInputs.indexOf(element.getAttribute('type') || '') !== -1;
+function isTimeBasedInput(element: Element): element is HTMLInputElement {
+  return timeBasedInputs.indexOf(element.getAttribute('type')!) !== -1;
 }
 
-function normalizeTimeBasedValue(element: Element): string {
-  const value = element['value'] as string;
-  const type = element['type'];
+function normalizeTimeBasedValue(element: HTMLInputElement): string {
+  const value = element.value;
+  const type = element.type;
   switch (type) {
     case 'date':
     case 'datetime-local':
