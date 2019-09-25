@@ -236,7 +236,7 @@ function normalizeTimeBasedValue(element: Element): string {
     case 'month':
       return value;
     case 'time':
-      return value.split(':').length === 2 ? value + ':00' : value;
+      return value.length === 5 ? value + ':00' : value; // Convert hh:mm to hh:mm:00
     case 'week':
       // For now we are not going to normalize input type week as it is not trivial
       return value;
