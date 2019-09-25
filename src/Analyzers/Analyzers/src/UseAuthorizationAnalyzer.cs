@@ -66,9 +66,9 @@ namespace Microsoft.AspNetCore.Analyzers
                             //
 
                             context.ReportDiagnostic(Diagnostic.Create(
-                                    StartupAnalyzer.Diagnostics.IncorrectlyConfiguredAuthorizationMiddleware,
-                                    useAuthorizationItem.Operation.Syntax.GetLocation(),
-                                    middlewareItem.UseMethod.Name));
+                                StartupAnalyzer.Diagnostics.IncorrectlyConfiguredAuthorizationMiddleware,
+                                useAuthorizationItem.Operation.Syntax.GetLocation(),
+                                middlewareItem.UseMethod.Name));
                         }
                     }
                     else if (middleware == "UseRouting")
